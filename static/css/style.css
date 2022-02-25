@@ -1,0 +1,14 @@
+
+li { float: left; border-right: solid 1px white; }
+li:last-child { border-right: none; }
+
+body {
+    margin: 0 auto;
+    width: 100%;
+}
+
+.register {
+    margin: 0 auto;
+    width: 50%;
+    padding-top: 100px;
+}

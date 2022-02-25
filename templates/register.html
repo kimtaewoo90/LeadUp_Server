@@ -1,0 +1,83 @@
+{% extends 'layout.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+
+    <div class="register">
+        <p style="border-bottom: 2px solid"> <strong>가입하기</strong> </p>
+
+        <form action="{{ url_for('register') }}" method="POST">
+
+            <input 
+                    style="width: 60%; padding: 10px"
+                    type="text" 
+                    name="user_id"
+                    placeholder="아이디"
+                    required>
+                    
+            <input 
+                    style="width: 30%; padding: 10px"
+                    type="submit" 
+                    name="check_duplicate" 
+                    value="중복확인">
+
+            <input 
+                    style="width: 60%; padding: 10px"
+                    type="password" 
+                    name="user_password" 
+                    placeholder="비밀번호"
+                    required>
+            <input 
+                    style="width: 60%; padding: 10px"
+                    type="text" 
+                    name="user_email" 
+                    placeholder="이메일"
+                    required>
+            <input 
+                    style="width: 60%; padding: 10px"
+                    type="text" 
+                    name="user_nickname" 
+                    placeholder="닉네임"
+                    required>
+            <input 
+                    style="width: 60%; padding: 10px"
+                    type="text" 
+                    name="user_phone_number" 
+                    placeholder="전화번호"
+                    required>
+
+            <input 
+                    style="width: 30%; padding: 10px"
+                    type="submit" 
+                    name="auth_btn" 
+                    value="인증번호 전송"
+                    required>
+
+
+            <label><input type="checkbox" id="agreement"> 이용약관, 개인정보처리방침</label>
+
+            <input 
+                    style="width: 90%; padding: 10px"
+                    type="submit" 
+                    name="auth_btn" 
+                    value="가입하기">         
+        
+        </form>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        <span>{{ message }}</span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+    </div>
+
+{% endblock %}
