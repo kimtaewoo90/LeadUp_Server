@@ -34,6 +34,10 @@ def login():
             flash("존재하지 않는 유저입니다. 가입을 부탁드립니다.")
             return render_template('home.html')
         
+        if user_pw != user_info.user_pw[0]:
+            flash("비밀번호가 다릅니다. 다시 시도해주세요")
+            return render_template('home.html')
+        
         elif len(user_info) == 1:
             # check pw
             if user_pw == user_info.user_pw[0]:
@@ -42,6 +46,17 @@ def login():
                 
                 return render_template('home.html')
 
+
+@app.route("/logout", methods=["POST","GET"])
+def logout():
+    if request.method == "POST":
+        session['logged_in'] = False
+        session.pop('username')
+        
+        return render_template('home.html')
+    
+    else:
+        return render_template('home.html')
 
 
 
