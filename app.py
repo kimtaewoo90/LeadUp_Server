@@ -1,8 +1,10 @@
 import sqlite3
-from flask import Flask, url_for, render_template, request, redirect, session, flash
+from flask import Flask, url_for, render_template, request, redirect, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager
 
 import pandas as pd
+
 
 app = Flask(__name__)
 app.secret_key = "234231432423"
@@ -31,20 +33,24 @@ def login():
                                             WHERE user_id = '{}'""".format(user_id), conn)
         
         if len(user_info) == 0:
-            flash("존재하지 않는 유저입니다. 가입을 부탁드립니다.")
-            return render_template('home.html')
+            return {"message" : "failed to login",
+                    "error" : "not exist user id"}, 500
+            
         
         if user_pw != user_info.user_pw[0]:
-            flash("비밀번호가 다릅니다. 다시 시도해주세요")
-            return render_template('home.html')
+            return {"message" : "failed to login",
+                    "error" : "didn't match password"}, 500
         
-        elif len(user_info) == 1:
+        if len(user_info) == 1:
             # check pw
             if user_pw == user_info.user_pw[0]:
                 session['username'] = user_info.user_nickname[0]
                 session['logged_in'] = True
                 
-                return render_template('home.html')
+                return jsonify(
+                    message = "success",
+                    access_token = create_access_token(identify=user_id, elxpires_delta = False)
+                )
 
 
 @app.route("/logout", methods=["POST","GET"])
@@ -77,13 +83,11 @@ def register():
         
         conn = sqlite3.connect(app.config['LEADUP_USER_DB'])
         
-        # 동일인 여러번 가입 방지
         check_duplicate_phone_number = pd.read_sql_query("""SELECT user_id, user_phone_number 
                                                 FROM user_info 
                                                 WHERE user_phone_number = '{}'""".format(user_phone_number), conn)
         
         
-        # 같은 아이디 사용 방지
         check_duplicate_id = pd.read_sql_query("""SELECT user_id, user_phone_number 
                                                 FROM user_info 
                                                 WHERE user_id = '{}'""".format(user_id), conn)
@@ -91,15 +95,14 @@ def register():
         conn.close()
         
         if len(check_duplicate_phone_number) >= 1:
-            flash("LeadUp 원칙상 1인1계정이 원칙입니다.")
-            return render_template('register.html')
+            return {"message" : "register failed",
+                    "error" : "already exist"}, 500
         
         if len(check_duplicate_id) >= 1:
-            flash("아이디가 중복됩니다. 다시 시도해주세요.")
-            return render_template('register.html')
+            return {"message" : "register failed",
+                    "error" : "duplicated ID"}, 500
         
         
-        # 회원가입 절차
         datas = [user_id, user_password, user_nickname, user_email, user_phone_number]
         conn = sqlite3.connect(app.config['LEADUP_USER_DB'])
         cursor = conn.cursor()
@@ -109,10 +112,8 @@ def register():
         conn.commit()
         conn.close()
         
-        flash("가입이 완료되었습니다.")
-        return render_template('register.html')
-
-
+        return {"message" : "success"}, 200
+        
 
 
 if __name__ == "__main__":
